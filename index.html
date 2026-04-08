@@ -1,1 +1,546 @@
-jdjdjdjdjdjejjjdjdjdjd
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Кликер · Школьный бустер</title>
+    <style>
+        * {
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: linear-gradient(145deg, #1a2a3a 0%, #0f1a24 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', 'Poppins', system-ui, -apple-system, 'Roboto', sans-serif;
+            margin: 0;
+            padding: 16px;
+        }
+
+        /* главная карточка */
+        .game-container {
+            background: rgba(22, 34, 48, 0.75);
+            backdrop-filter: blur(8px);
+            border-radius: 68px;
+            padding: 20px 24px 32px;
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.2s ease;
+        }
+
+        /* экран с очками */
+        .score-panel {
+            background: #0b1219;
+            border-radius: 80px;
+            padding: 20px 32px;
+            text-align: center;
+            margin-bottom: 30px;
+            box-shadow: inset 0 5px 5px rgba(0,0,0,0.4), 0 8px 18px rgba(0,0,0,0.2);
+            border-bottom: 2px solid #ffb347;
+        }
+
+        .score-label {
+            color: #9bb7d4;
+            letter-spacing: 2px;
+            font-weight: 500;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+        }
+
+        .score-value {
+            font-size: 5.2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #FFE6B0, #FFB347);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            line-height: 1;
+            margin: 8px 0;
+        }
+
+        /* кликабельная кнопка-ядро */
+        .click-area {
+            display: flex;
+            justify-content: center;
+            margin: 15px 0 25px;
+        }
+
+        .cookie {
+            background: radial-gradient(circle at 35% 30%, #ffdd99, #e09d32);
+            width: 210px;
+            height: 210px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 20px 30px rgba(0, 0, 0, 0.4), inset 0 -8px 0 #aa6f2c, inset 0 2px 8px rgba(255,255,200,0.8);
+            transition: transform 0.07s linear, box-shadow 0.1s ease;
+            user-select: none;
+        }
+
+        .cookie:active {
+            transform: scale(0.94);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.5), inset 0 -3px 0 #aa6f2c;
+        }
+
+        .cookie-emoji {
+            font-size: 5.5rem;
+            filter: drop-shadow(2px 4px 8px rgba(0,0,0,0.3));
+            transition: font-size 0.05s;
+        }
+
+        /* бустеры */
+        .upgrades {
+            background: rgba(10, 20, 28, 0.8);
+            border-radius: 56px;
+            padding: 18px 20px;
+            margin-top: 15px;
+            backdrop-filter: blur(4px);
+        }
+
+        .upgrade-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #1e2f3c;
+            margin: 12px 0;
+            padding: 12px 20px;
+            border-radius: 50px;
+            transition: all 0.2s;
+            border: 1px solid #3a5568;
+        }
+
+        .upgrade-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .upgrade-name {
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: #ffde9c;
+        }
+
+        .upgrade-desc {
+            font-size: 0.75rem;
+            color: #9ab3c7;
+        }
+
+        .upgrade-price {
+            font-family: monospace;
+            font-weight: bold;
+            font-size: 1.2rem;
+            background: #00000066;
+            padding: 4px 12px;
+            border-radius: 60px;
+            color: #ffb347;
+        }
+
+        button.buy {
+            background: #f3a333;
+            border: none;
+            font-weight: bold;
+            font-size: 1.1rem;
+            padding: 6px 18px;
+            border-radius: 40px;
+            cursor: pointer;
+            color: #1f2c36;
+            font-weight: 800;
+            transition: 0.1s linear;
+            box-shadow: 0 3px 0 #7a4a1a;
+        }
+
+        button.buy:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 #7a4a1a;
+        }
+
+        button.buy:disabled {
+            opacity: 0.5;
+            transform: none;
+            cursor: not-allowed;
+            filter: grayscale(0.1);
+        }
+
+        .perks {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .stat {
+            background: #00000055;
+            border-radius: 40px;
+            padding: 6px 15px;
+            text-align: center;
+            font-weight: 500;
+            color: #ffd58c;
+            font-size: 0.9rem;
+            backdrop-filter: blur(2px);
+        }
+
+        .reset-btn {
+            background: #2c3e4e;
+            border: none;
+            color: #ffbb77;
+            font-weight: bold;
+            padding: 10px 22px;
+            border-radius: 40px;
+            cursor: pointer;
+            margin-top: 18px;
+            width: 100%;
+            font-size: 0.9rem;
+            transition: 0.1s;
+            box-shadow: inset 0 1px 0 #54738b, 0 2px 6px black;
+        }
+
+        .reset-btn:active {
+            transform: scale(0.97);
+        }
+
+        footer {
+            font-size: 0.7rem;
+            text-align: center;
+            color: #6f8da3;
+            margin-top: 18px;
+        }
+
+        @media (max-width: 480px) {
+            .cookie {
+                width: 160px;
+                height: 160px;
+            }
+            .cookie-emoji {
+                font-size: 4rem;
+            }
+            .score-value {
+                font-size: 3.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="game-container">
+    <div class="score-panel">
+        <div class="score-label">🍪 ТВОИ КЛИКИ 🍪</div>
+        <div class="score-value" id="scoreDisplay">0</div>
+        <div class="stat">⚡ клик: +<span id="clickPower">1</span> очков</div>
+    </div>
+
+    <div class="click-area">
+        <div class="cookie" id="clickButton">
+            <div class="cookie-emoji">🍪✨</div>
+        </div>
+    </div>
+
+    <div class="upgrades">
+        <div class="upgrade-card">
+            <div class="upgrade-info">
+                <span class="upgrade-name">📈 Усиление клика</span>
+                <span class="upgrade-desc">+1 к силе клика</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <span class="upgrade-price" id="priceUpgradePower">10 🍪</span>
+                <button class="buy" id="buyPowerBtn">Купить</button>
+            </div>
+        </div>
+
+        <div class="upgrade-card">
+            <div class="upgrade-info">
+                <span class="upgrade-name">🤖 Автокликер</span>
+                <span class="upgrade-desc">кликает 1 раз / сек</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <span class="upgrade-price" id="priceAutoClicker">50 🍪</span>
+                <button class="buy" id="buyAutoBtn">Купить</button>
+            </div>
+        </div>
+
+        <div class="perks">
+            <div class="stat">🤖 автоклик: <span id="autoCount">0</span></div>
+            <div class="stat">💪 мощь клика: <span id="powerStat">1</span></div>
+            <div class="stat">🏆 кликов всего: <span id="totalClicksStat">0</span></div>
+        </div>
+
+        <button class="reset-btn" id="resetGame">⟳ Новая игра (сброс)</button>
+        <footer>⚡ жми на печеньку — качай силу! ⚡</footer>
+    </div>
+</div>
+
+<script>
+    // --- Состояние игры ---
+    let cookies = 0;                // текущие очки (печеньки)
+    let clickPower = 1;            // сколько даёт один клик
+    let autoClickers = 0;          // количество автокликеров
+    let totalClicks = 0;           // общее число ручных кликов (статистика)
+
+    // цены (базовые)
+    let upgradePowerPrice = 10;
+    let upgradeAutoPrice = 50;
+
+    // --- DOM элементы ---
+    const scoreDisplay = document.getElementById('scoreDisplay');
+    const clickPowerSpan = document.getElementById('clickPower');
+    const powerStatSpan = document.getElementById('powerStat');
+    const autoCountSpan = document.getElementById('autoCount');
+    const totalClicksSpan = document.getElementById('totalClicksStat');
+
+    const pricePowerSpan = document.getElementById('priceUpgradePower');
+    const priceAutoSpan = document.getElementById('priceAutoClicker');
+
+    const buyPowerBtn = document.getElementById('buyPowerBtn');
+    const buyAutoBtn = document.getElementById('buyAutoBtn');
+    const clickButton = document.getElementById('clickButton');
+    const resetBtn = document.getElementById('resetGame');
+
+    // --- Вспомогательные функции UI ---
+    function updateUI() {
+        // отображаем текущие печеньки (целое число, красиво)
+        scoreDisplay.innerText = Math.floor(cookies);
+        clickPowerSpan.innerText = clickPower;
+        powerStatSpan.innerText = clickPower;
+        autoCountSpan.innerText = autoClickers;
+        totalClicksSpan.innerText = totalClicks;
+
+        // отображаем цены (с учётом динамического роста)
+        pricePowerSpan.innerText = upgradePowerPrice + ' 🍪';
+        priceAutoSpan.innerText = upgradeAutoPrice + ' 🍪';
+
+        // блокировка кнопок если не хватает печенек
+        buyPowerBtn.disabled = (cookies < upgradePowerPrice);
+        buyAutoBtn.disabled = (cookies < upgradeAutoPrice);
+    }
+
+    // --- Сохранение в localStorage (чтобы не потерять прогресс даже при закрытии) ---
+    function saveGame() {
+        const saveData = {
+            cookies: cookies,
+            clickPower: clickPower,
+            autoClickers: autoClickers,
+            totalClicks: totalClicks,
+            upgradePowerPrice: upgradePowerPrice,
+            upgradeAutoPrice: upgradeAutoPrice
+        };
+        localStorage.setItem('clickerSchoolSave', JSON.stringify(saveData));
+    }
+
+    function loadGame() {
+        const raw = localStorage.getItem('clickerSchoolSave');
+        if (!raw) return false;
+        try {
+            const data = JSON.parse(raw);
+            cookies = data.cookies ?? 0;
+            clickPower = data.clickPower ?? 1;
+            autoClickers = data.autoClickers ?? 0;
+            totalClicks = data.totalClicks ?? 0;
+            upgradePowerPrice = data.upgradePowerPrice ?? 10;
+            upgradeAutoPrice = data.upgradeAutoPrice ?? 50;
+            return true;
+        } catch(e) { return false; }
+    }
+
+    // --- Добавление печенек (ручной клик или авто) ---
+    function addCookies(amount, isManual = false) {
+        if (amount <= 0) return;
+        cookies += amount;
+        if (isManual) {
+            totalClicks += 1;   // один ручной клик, даже если сила клика >1, но по логике "нажал один раз"
+        }
+        // проверка на бесконечность не нужна, но ограничим разумно
+        if (cookies > 1e15) cookies = 1e15;
+        updateUI();
+        saveGame();
+        // анимация вспышки при клике (доп. фишка)
+        if (isManual) {
+            const cookieDiv = document.getElementById('clickButton');
+            cookieDiv.style.transform = 'scale(0.92)';
+            setTimeout(() => {
+                if (cookieDiv) cookieDiv.style.transform = '';
+            }, 90);
+        }
+    }
+
+    // --- Покупка улучшения силы клика ---
+    function buyClickUpgrade() {
+        if (cookies >= upgradePowerPrice) {
+            cookies -= upgradePowerPrice;
+            clickPower += 1;
+            // увеличиваем цену следующего улучшения (формула: цена = базовая + прогрессив)
+            upgradePowerPrice = Math.floor(upgradePowerPrice * 1.6);
+            // кап цены чтобы не улетело в космос (опционально)
+            if (upgradePowerPrice > 50000) upgradePowerPrice = 50000;
+            updateUI();
+            saveGame();
+            // мини-эффект
+            showFloaty("💪 Сила +1", "#ffc285");
+        } else {
+            showFloaty("❌ Не хватает печенек!", "#ffaa88");
+        }
+    }
+
+    // --- Покупка автокликера ---
+    function buyAutoClicker() {
+        if (cookies >= upgradeAutoPrice) {
+            cookies -= upgradeAutoPrice;
+            autoClickers += 1;
+            // цена растёт с каждым автокликером
+            upgradeAutoPrice = Math.floor(upgradeAutoPrice * 1.5);
+            if (upgradeAutoPrice > 120000) upgradeAutoPrice = 120000;
+            updateUI();
+            saveGame();
+            showFloaty("🤖 Новый автокликер!", "#aaffdd");
+            // перезапускаем интервал, чтобы сразу учесть увеличение (не обязательно, интервал уже бежит)
+        } else {
+            showFloaty("🍪 Сначала накопи печенек!", "#ffaa88");
+        }
+    }
+
+    // --- эффект всплывающей подсказки (как в настоящих кликерах) ---
+    let toastTimeout = null;
+    function showFloaty(text, colorHint = "#ffd966") {
+        const existing = document.querySelector('.floaty-toast');
+        if(existing) existing.remove();
+        const div = document.createElement('div');
+        div.innerText = text;
+        div.className = 'floaty-toast';
+        div.style.position = 'fixed';
+        div.style.bottom = '30%';
+        div.style.left = '50%';
+        div.style.transform = 'translateX(-50%)';
+        div.style.backgroundColor = '#1e2c38';
+        div.style.color = colorHint;
+        div.style.padding = '8px 24px';
+        div.style.borderRadius = '50px';
+        div.style.fontWeight = 'bold';
+        div.style.fontSize = '1rem';
+        div.style.border = `1px solid ${colorHint}`;
+        div.style.boxShadow = '0 6px 16px black';
+        div.style.zIndex = '999';
+        div.style.backdropFilter = 'blur(8px)';
+        div.style.fontFamily = 'inherit';
+        div.style.pointerEvents = 'none';
+        div.style.transition = 'opacity 0.2s';
+        document.body.appendChild(div);
+        setTimeout(() => {
+            if(div) div.style.opacity = '0';
+            setTimeout(() => { if(div && div.remove) div.remove(); }, 300);
+        }, 1000);
+    }
+
+    // --- Ручной клик по печеньке ---
+    function handleManualClick(e) {
+        let gain = clickPower;
+        addCookies(gain, true);   // true = ручной клик
+        // маленький всплеск с цифрой урона (круто)
+        const ripple = document.createElement('div');
+        ripple.innerText = `+${gain}`;
+        ripple.style.position = 'fixed';
+        const rect = clickButton.getBoundingClientRect();
+        ripple.style.left = (rect.left + rect.width/2 - 20) + 'px';
+        ripple.style.top = (rect.top - 15) + 'px';
+        ripple.style.fontSize = '1.6rem';
+        ripple.style.fontWeight = 'bold';
+        ripple.style.color = '#ffdd99';
+        ripple.style.textShadow = '0 0 4px black';
+        ripple.style.pointerEvents = 'none';
+        ripple.style.zIndex = '1000';
+        ripple.style.transition = 'transform 0.3s ease-out, opacity 0.4s';
+        ripple.style.transform = 'translateY(0px)';
+        ripple.style.opacity = '1';
+        document.body.appendChild(ripple);
+        requestAnimationFrame(() => {
+            ripple.style.transform = 'translateY(-40px)';
+            ripple.style.opacity = '0';
+        });
+        setTimeout(() => {
+            if(ripple && ripple.remove) ripple.remove();
+        }, 400);
+    }
+
+    // --- Сброс всей игры (с подтверждением) ---
+    function resetGame() {
+        if (confirm('🔁 Сбросить прогресс? Все клики, улучшения и печеньки обнулятся. Уверен?')) {
+            cookies = 0;
+            clickPower = 1;
+            autoClickers = 0;
+            totalClicks = 0;
+            upgradePowerPrice = 10;
+            upgradeAutoPrice = 50;
+            updateUI();
+            saveGame();
+            showFloaty("✨ Игра перезапущена! Кликай заново ✨", "#88ffaa");
+        }
+    }
+
+    // --- АВТОСОХРАНЕНИЕ и АВТОКЛИКЕР ИНТЕРВАЛ (работает постоянно) ---
+    let autoInterval = null;
+    function startAutoClickerLoop() {
+        if (autoInterval) clearInterval(autoInterval);
+        autoInterval = setInterval(() => {
+            if (autoClickers > 0) {
+                // каждый автокликер даёт +1 очко в секунду (классический вариант)
+                // но мы можем давать силу = авто_кликеры * 1 (фиксированная сила)
+                // при этом сами автокликеры не увеличивают силу клика ручного, но это норм.
+                let autoGain = autoClickers;   // каждый авто приносит 1 очко в тик
+                if (autoGain > 0) {
+                    cookies += autoGain;
+                    // лимит
+                    if (cookies > 1e15) cookies = 1e15;
+                    updateUI();
+                    saveGame();
+                    // лёгкая анимация мерцания для автогенерации (не спамим)
+                    const autoHint = document.querySelector('.perks');
+                    if (autoHint && autoClickers > 0) {
+                        autoHint.style.transition = '0.05s';
+                        autoHint.style.opacity = '0.7';
+                        setTimeout(() => { if(autoHint) autoHint.style.opacity = '1'; }, 90);
+                    }
+                }
+            }
+        }, 1000);
+    }
+
+    // --- обработчики событий ---
+    function bindEvents() {
+        clickButton.addEventListener('click', handleManualClick);
+        buyPowerBtn.addEventListener('click', buyClickUpgrade);
+        buyAutoBtn.addEventListener('click', buyAutoClicker);
+        resetBtn.addEventListener('click', resetGame);
+    }
+
+    // дополнительная защита от случайного двойного нажатия на кнопки
+    function initGame() {
+        const loaded = loadGame();
+        if (!loaded) {
+            // новые значения по умолчанию
+            cookies = 0;
+            clickPower = 1;
+            autoClickers = 0;
+            totalClicks = 0;
+            upgradePowerPrice = 10;
+            upgradeAutoPrice = 50;
+        }
+        updateUI();
+        bindEvents();
+        startAutoClickerLoop();
+        // Сохраняемся при закрытии вкладки (доп. надёжность)
+        window.addEventListener('beforeunload', () => {
+            saveGame();
+        });
+        // каждые 10 секунд дополнительное сохранение (на всякий случай)
+        setInterval(() => saveGame(), 7000);
+    }
+
+    // запускаем всё
+    initGame();
+</script>
+</body>
+  </html>
